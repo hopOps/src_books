@@ -1,3 +1,9 @@
+
+default:
+  tags:
+    - openshift
+
+
 sonarqube-check:
   image: 
     name: sonarsource/sonar-scanner-cli:latest
