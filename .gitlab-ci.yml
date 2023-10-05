@@ -1,11 +1,18 @@
 stages:
   - Deploy-Build
+  - sonar 
+
+variables:
+  TRIGRAM: "DEM"
 
 include:
   - project: 'common/ci-chain'
     file:
       - build.yml
     ref: V1
+  - project: common/sonar-scan
+    ref: V1
+    file: sonar.yml
 
 build:
   extends: .main
