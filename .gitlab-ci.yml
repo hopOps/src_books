@@ -12,5 +12,5 @@ build:
   stage: Deploy-Build
   variables:
     IMAGE_VERSION: "0.0.1"
-    IMAGE_NAME: demo-books-Nhajji
+    IMAGE_NAME: demo-books-nhajji
     HARBOR_REPO: issc-dem
