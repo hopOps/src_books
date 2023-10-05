@@ -1,0 +1,16 @@
+stages:
+  - Deploy-Build
+
+include:
+  - project: 'common/ci-chain'
+    file:
+      - build.yml
+    ref: V1
+
+build:
+  extends: .main
+  stage: Deploy-Build
+  variables:
+    IMAGE_VERSION: "0.0.1"
+    IMAGE_NAME: demo-books-Nhajji
+    HARBOR_REPO: issc-dem
