@@ -1,9 +1,8 @@
 FROM registry.redhat.io/ubi8/python-36
-WORKDIR /app
 
-COPY requirements.txt /app
+WORKDIR /app
+COPY . /app
+
 RUN pip install -r requirements.txt
 
-ADD templates /app/templates
-COPY app.py /app
-CMD ["flask", "run"]~
+CMD ["sh", "-c", "python /app/init_db.py && flask run"]~
