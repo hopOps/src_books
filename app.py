@@ -21,6 +21,26 @@ def get_db_connection():
     conn = psycopg2.connect(conn_string)
     return conn
 
+
+def init():
+    """Create Database schema
+
+    Returns:
+        None
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Execute a command: this creates a new table
+    cur.execute('DROP TABLE IF EXISTS books;')
+    cur.execute('CREATE TABLE books (id serial PRIMARY KEY,'
+                                    'title varchar (150) NOT NULL,'
+                                    'author varchar (50) NOT NULL,'
+                                    'pages_num integer NOT NULL,'
+                                    'review text,'
+                                    'date_added date DEFAULT CURRENT_TIMESTAMP);'
+                                    )
+    conn.commit()
+
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -53,28 +73,6 @@ def create():
     return render_template('create.html')
 
 
-@app.init('/init/', methods=('GET'))
-def init():
-    """Create Database schema
-
-    Returns:
-        None
-    """
-    conn = get_db_connection()
-    cur = conn.cursor()
-    # Execute a command: this creates a new table
-    cur.execute('DROP TABLE IF EXISTS books;')
-    cur.execute('CREATE TABLE books (id serial PRIMARY KEY,'
-                                    'title varchar (150) NOT NULL,'
-                                    'author varchar (50) NOT NULL,'
-                                    'pages_num integer NOT NULL,'
-                                    'review text,'
-                                    'date_added date DEFAULT CURRENT_TIMESTAMP);'
-                                    )
-    conn.commit()
-    books = cur.fetchall()
-    return render_template('index.html', books=books)
-
-
 if __name__ == '__main__':
+    init()
     app.run()
