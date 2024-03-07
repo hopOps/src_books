@@ -4,28 +4,22 @@ from flask import Flask, render_template, request, url_for, redirect
 
 app = Flask(__name__)
 
-
-connection_string = os.environ.get('POSTGRES_CONNECTION_STRING')
-
-conn_str_params = {pair.split('=')[0]: pair.split('=')[1] for pair in connection_string.split(' ')}
-
-conn_string = "host={0} user={1} dbname={2} password={3} sslmode=require".format(
-    conn_str_params['host'],
-    conn_str_params['user'],
-    conn_str_params['dbname'],
-    conn_str_params['password'])
-
-
 def get_db_connection():
     """To connect to the Postgres database
 
     Returns:
-        _type_: _description_
+        class: connect to db
     """
-    conn = psycopg2.connect(connection_string)
+    conn_str = os.environ['POSTGRESQLCONNSTR_postgres_conn_string']
+    conn_str_params = {pair.split('=')[0]: pair.split('=')[1] for pair in conn_str.split(' ')}
+
+    conn_string = "host={0} user={1} dbname={2} password={3} sslmode=require".format(
+        conn_str_params['host'],
+        conn_str_params['user'],
+        conn_str_params['dbname'],
+        conn_str_params['password'])
+    conn = psycopg2.connect(conn_string)
     return conn
-
-
 
 @app.route('/')
 def index():
@@ -57,3 +51,30 @@ def create():
         return redirect(url_for('index'))
 
     return render_template('create.html')
+
+
+@app.init('/init/', methods=('GET'))
+def init():
+    """Create Database schema
+
+    Returns:
+        None
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Execute a command: this creates a new table
+    cur.execute('DROP TABLE IF EXISTS books;')
+    cur.execute('CREATE TABLE books (id serial PRIMARY KEY,'
+                                    'title varchar (150) NOT NULL,'
+                                    'author varchar (50) NOT NULL,'
+                                    'pages_num integer NOT NULL,'
+                                    'review text,'
+                                    'date_added date DEFAULT CURRENT_TIMESTAMP);'
+                                    )
+    conn.commit()
+    books = cur.fetchall()
+    return render_template('index.html', books=books)
+
+
+if __name__ == '__main__':
+    app.run()
