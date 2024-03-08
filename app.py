@@ -2,7 +2,31 @@ import os
 import psycopg2
 from flask import Flask, render_template, request, url_for, redirect
 
+
 app = Flask(__name__)
+
+def init_db():
+    """Create Database schema
+
+    Returns:
+        None
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("select exists(select * from information_schema.tables where table_name=%s)", ('books',))
+    if cur.fetchone()[0]:
+        print("DB OK")
+    else:
+        cur.execute('CREATE TABLE books (id serial PRIMARY KEY,'
+                                        'title varchar (150) NOT NULL,'
+                                        'author varchar (50) NOT NULL,'
+                                        'pages_num integer NOT NULL,'
+                                        'review text,'
+                                        'date_added date DEFAULT CURRENT_TIMESTAMP);'
+                                        )
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def get_db_connection():
     """To connect to the Postgres database
@@ -22,27 +46,9 @@ def get_db_connection():
     return conn
 
 
-def init():
-    """Create Database schema
-
-    Returns:
-        None
-    """
-    conn = get_db_connection()
-    cur = conn.cursor()
-    # Execute a command: this creates a new table
-    cur.execute('DROP TABLE IF EXISTS books;')
-    cur.execute('CREATE TABLE books (id serial PRIMARY KEY,'
-                                    'title varchar (150) NOT NULL,'
-                                    'author varchar (50) NOT NULL,'
-                                    'pages_num integer NOT NULL,'
-                                    'review text,'
-                                    'date_added date DEFAULT CURRENT_TIMESTAMP);'
-                                    )
-    conn.commit()
-
 @app.route('/')
 def index():
+    init_db() # to change
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT * FROM books;')
@@ -72,7 +78,5 @@ def create():
 
     return render_template('create.html')
 
-
 if __name__ == '__main__':
-    init()
-    app.run()
+    app.run(debug=True, use_reloader=False)
