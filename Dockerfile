@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9/python-39
+FROM alpine/flake8:latest
 
 WORKDIR /app
 COPY . /app
